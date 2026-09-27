@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SubSurf — Simulador</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;background:#071018;color:#fff;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}
+body{min-height:100vh;display:flex;justify-content:center}
+.app{width:min(100%,520px);min-height:100vh;background:linear-gradient(#0a1722,#061018);position:relative;overflow:hidden}
+header{height:70px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #173040;background:#09151f;position:relative;z-index:5}
+.logo{font-size:21px;font-weight:900}.logo span{color:#23a7ff}.tag{font-size:9px;color:#8ea5b4;border:1px solid #294252;border-radius:99px;padding:4px 7px}
+main{padding:16px}.card{background:#0d1b26;border:1px solid #203746;border-radius:16px;box-shadow:0 10px 30px #0004}
+.balance{padding:16px;display:flex;align-items:center;justify-content:space-between}.label{font-size:11px;color:#8da5b5}.money{font-size:27px;font-weight:900;margin-top:3px}.btn{border:0;border-radius:11px;padding:12px 15px;font-weight:800;cursor:pointer;color:#fff;background:#148cff}.btn:active{transform:scale(.98)}.btn.secondary{background:#172936;border:1px solid #2b4555}.btn.green{background:#0fba7a}.btn:disabled{opacity:.45}
+.menu{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.hero{padding:20px;margin-top:14px;background:radial-gradient(circle at 80% 20%,#12618c55,transparent 45%),#0d1b26}
+h1{font-size:29px;margin:0 0 7px}.hero p{color:#9bb0bc;font-size:13px;line-height:1.5;margin:0 0 18px}
+.notice{font-size:10px;line-height:1.45;color:#ffcf70;background:#30250e;border:1px solid #59451b;padding:9px 11px;border-radius:10px;margin-top:14px}
+.gameWrap{display:none;padding:0 12px 18px}.gameTop{display:flex;justify-content:space-between;align-items:center;padding:12px 2px}.stat{font-size:12px;color:#a9bcc8}.stat b{color:#fff;font-size:17px}.game{position:relative;height:calc(100vh - 155px);min-height:540px;max-height:760px;overflow:hidden;border-radius:18px;background:linear-gradient(#182f3c 0%,#10252f 47%,#0b1820 48%,#091218 100%);border:1px solid #244252;touch-action:none}
+.sky{position:absolute;inset:0;background:linear-gradient(90deg,transparent 0 15%,#ffffff08 15.2% 15.7%,transparent 16% 84%,#ffffff08 84.2% 84.7%,transparent 85%);opacity:.7}
+.track{position:absolute;left:8%;right:8%;bottom:-5%;height:66%;background:linear-gradient(90deg,#182e39,#10222b 50%,#182e39);clip-path:polygon(22% 0,78% 0,100% 100%,0 100%);border-left:1px solid #375260;border-right:1px solid #375260}
+.lane{position:absolute;bottom:0;width:2px;height:68%;background:linear-gradient(transparent,#4b6975aa);opacity:.7}.l1{left:36%}.l2{left:64%}
+.gameCoin,.obstacle,.player{position:absolute;z-index:3;transform:translate(-50%,-50%);transition:none}
+.gameCoin{width:28px;height:28px;border-radius:50%;background:#ffd24a;border:4px solid #fff0a2;box-shadow:0 0 18px #ffcb32aa;color:#6d4b00;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:13px}
+.obstacle{width:42px;height:42px;border-radius:9px;background:#e74c3c;border:2px solid #ff9a8f;box-shadow:0 6px 12px #0007}.obstacle:after{content:"";position:absolute;left:9px;right:9px;top:18px;height:5px;background:#fff8}
+.player{width:42px;height:52px;border-radius:15px 15px 9px 9px;background:linear-gradient(#20a9ff,#0b5fbe);border:2px solid #8bd7ff;box-shadow:0 8px 18px #0008}.player:before{content:"";position:absolute;width:22px;height:22px;border-radius:50%;background:#ffd1b3;top:-13px;left:8px;border:2px solid #f0a57f}.player:after{content:"";position:absolute;left:6px;right:6px;bottom:7px;height:7px;border-radius:9px;background:#071018}
+.overlay{position:absolute;inset:0;display:none;z-index:10;background:#061018dd;backdrop-filter:blur(5px);align-items:center;justify-content:center;padding:24px}.modal{width:100%;max-width:360px;padding:22px;text-align:center}.modal h2{margin:0 0 7px}.modal p{color:#9eb2be;font-size:13px;line-height:1.5}.big{font-size:40px;font-weight:950;margin:12px 0}.actions{display:flex;gap:9px;justify-content:center}.actions .btn{flex:1}
+.touch{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:7}.touch button{width:54px;height:48px;border-radius:13px;border:1px solid #47606c;background:#071018aa;color:white;font-size:22px}
+.toast{position:fixed;left:50%;bottom:25px;transform:translateX(-50%);background:#0d1b26;border:1px solid #31505f;border-radius:12px;padding:10px 14px;font-size:12px;display:none;z-index:99}
+@media(max-width:380px){.game{min-height:500px}.menu{gap:8px}.btn{padding:11px 10px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div class="logo">👑 Sub<span>Surf</span></div><div class="tag">SIMULAÇÃO</div></header>
+
+<main id="home">
+  <section class="card balance">
+    <div><div class="label">SALDO VIRTUAL</div><div class="money" id="balance">R$ 0,00</div></div>
+    <button class="btn" onclick="openDeposit()">+ Depositar</button>
+  </section>
+
+  <section class="card hero">
+    <h1>Corra. Colete. Supere.</h1>
+    <p>Uma versão demonstrativa inspirada em jogos de corrida infinita. Colete moedas virtuais e aumente seu saldo de simulação.</p>
+    <button class="btn" onclick="openDeposit()">Depositar R$ 30,00</button>
+    <div class="notice">⚠️ AMBIENTE FICTÍCIO: nenhum depósito, saque ou pagamento é real. Os valores exibidos são apenas créditos virtuais.</div>
+  </section>
+
+  <section class="menu">
+    <button class="btn secondary" onclick="showRules()">🎮 Como jogar</button>
+    <button class="btn secondary" onclick="openWithdraw()">💸 Simular saque</button>
+  </section>
+</main>
+
+<section class="gameWrap" id="gameWrap">
+  <div class="gameTop">
+    <div class="stat">MOEDAS<br><b id="coins">0</b></div>
+    <div class="stat">SALDO<br><b id="gameBalance">R$ 30,00</b></div>
+    <button class="btn secondary" onclick="quitGame()">Sair</button>
+  </div>
+  <div class="game" id="game">
+    <div class="sky"></div><div class="track"></div><div class="lane l1"></div><div class="lane l2"></div>
+    <div class="player" id="player"></div>
+    <div class="overlay" id="gameOver">
+      <div class="modal card">
+        <h2>Fim de jogo</h2><p>Você coletou</p><div class="big" id="finalCoins">0 moedas</div>
+        <p>Saldo virtual acumulado: <b id="finalBalance">R$ 0,00</b></p>
+        <div class="actions"><button class="btn" onclick="startGame()">Jogar novamente</button><button class="btn secondary" onclick="quitGame()">Menu</button></div>
+      </div>
+    </div>
+    <div class="touch"><button onclick="move(-1)">◀</button><button onclick="jump()">▲</button><button onclick="move(1)">▶</button></div>
+  </div>
+</section>
+
+<div class="overlay" id="modalOverlay">
+  <div class="modal card" id="modal"></div>
+</div>
+<div class="toast" id="toast"></div>
+</div>
+
+<script>
+const moneyFmt = v => v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+let balance=0, coins=0, lane=1, running=false, speed=5, objects=[], last=0, spawn=0, raf=0, jumping=false, jumpUntil=0;
+const game=document.getElementById('game'), player=document.getElementById('player');
+const laneX=()=>[25,50,75][lane];
+function updateUI(){document.getElementById('balance').textContent=moneyFmt(balance);document.getElementById('gameBalance').textContent=moneyFmt(balance);document.getElementById('coins').textContent=coins}
+function toast(t){const x=document.getElementById('toast');x.textContent=t;x.style.display='block';setTimeout(()=>x.style.display='none',1500)}
+function modal(html){document.getElementById('modal').innerHTML=html;document.getElementById('modalOverlay').style.display='flex'}
+function closeModal(){document.getElementById('modalOverlay').style.display='none'}
+function openDeposit(){modal(`<h2>Depósito virtual</h2><p>Para iniciar uma partida, você recebe créditos fictícios no valor de <b>R$ 30,00</b>.</p><div class="big">R$ 30,00</div><p>Isso não movimenta dinheiro real.</p><button class="btn" onclick="closeModal();balance=30;updateUI();startGame()">Adicionar 30 créditos e jogar</button><br><br><button class="btn secondary" onclick="closeModal()">Cancelar</button>`)}
+function openWithdraw(){modal(`<h2>Simular saque</h2><p>Seu saldo atual é</p><div class="big">${moneyFmt(balance)}</div><p>Esta função apenas demonstra a interface. Nenhum valor é enviado ou convertido em dinheiro.</p><button class="btn green" onclick="closeModal();toast('Saque simulado — nenhum pagamento foi realizado.')">Simular solicitação</button><br><br><button class="btn secondary" onclick="closeModal()">Voltar</button>`)}
+function showRules(){modal(`<h2>Como jogar</h2><p>Use ◀ ▶ ou as setas para trocar de pista. Use ▲ ou Espaço para pular. Colete as moedas amarelas e desvie dos obstáculos.</p><p><b>1 moeda = 1 crédito virtual.</b></p><div class="notice">Tudo nesta demonstração é fictício e não possui valor monetário.</div><br><button class="btn" onclick="closeModal()">Entendi</button>`)}
+function setPlayer(){player.style.left=laneX()+'%';player.style.bottom='12%';player.style.top='auto'}
+function move(d){if(!running)return;lane=Math.max(0,Math.min(2,lane+d));setPlayer()}
+function jump(){if(!running||jumping)return;jumping=true;jumpUntil=performance.now()+650;player.style.transform='translate(-50%,-95%) scale(.95)'}
+function startGame(){
+  closeModal(); document.getElementById('home').style.display='none';document.getElementById('gameWrap').style.display='block';
+  document.getElementById('gameOver').style.display='none'; coins=0; lane=1; speed=5; objects.forEach(o=>o.el.remove());objects=[];running=true;setPlayer();updateUI();cancelAnimationFrame(raf);last=performance.now();spawn=0;raf=requestAnimationFrame(loop);
+}
+function quitGame(){running=false;cancelAnimationFrame(raf);document.getElementById('gameWrap').style.display='none';document.getElementById('home').style.display='block';updateUI()}
+function createObject(type){
+  const el=document.createElement('div');el.className=type==='coin'?'gameCoin':'obstacle';el.textContent=type==='coin'?'R$':'';
+  const obj={el,type,lane:Math.floor(Math.random()*3),y:-8};el.style.left=laneX(obj.lane)+'%';el.style.top=obj.y+'%';game.appendChild(el);objects.push(obj);
+}
+function hit(a,b){return Math.abs(a.lane-b.lane)<.1 && Math.abs(a.y-b.y)<7}
+function endGame(){
+  running=false;cancelAnimationFrame(raf);
+  document.getElementById('finalCoins').textContent=coins+' moedas';
+  document.getElementById('finalBalance').textContent=moneyFmt(balance);
+  document.getElementById('gameOver').style.display='flex';
+}
+function loop(now){
+  if(!running)return;
+  const dt=Math.min(40,now-last);last=now;
+  speed=Math.min(12,speed+dt*.00025);spawn+=dt;
+  if(spawn>Math.max(360,850-speed*45)){spawn=0;createObject(Math.random()<.62?'coin':'obstacle')}
+  if(jumping && now>jumpUntil){jumping=false;player.style.transform='translate(-50%,-50%)'}
+  for(let i=objects.length-1;i>=0;i--){
+    const o=objects[i];o.y+=speed*dt*.008;o.el.style.top=o.y+'%';
+    if(hit(o,{lane,y:86})){
+      if(o.type==='coin'){coins++;balance+=1;updateUI();o.el.remove();objects.splice(i,1);continue}
+      if(!jumping){o.el.remove();objects.splice(i,1);endGame();return}
+    }
+    if(o.y>110){o.el.remove();objects.splice(i,1)}
+  }
+  raf=requestAnimationFrame(loop);
+}
+window.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')move(-1);else if(e.key==='ArrowRight')move(1);else if(e.key===' '||e.key==='ArrowUp'){e.preventDefault();jump()}});
+let sx=0,sy=0;game.addEventListener('touchstart',e=>{sx=e.changedTouches[0].clientX;sy=e.changedTouches[0].clientY},{passive:true});
+game.addEventListener('touchend',e=>{const x=e.changedTouches[0].clientX,y=e.changedTouches[0].clientY,dx=x-sx,dy=y-sy;if(Math.max(Math.abs(dx),Math.abs(dy))<30)return;if(Math.abs(dx)>Math.abs(dy))move(dx>0?1:-1);else if(dy<0)jump()},{passive:true});
+updateUI();
+</script>
+</body>
+</html>
