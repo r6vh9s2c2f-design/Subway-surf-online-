@@ -2,5 +2,20 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>Subway - Star Coins</title>
-<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#000;overflow:hidden;font-family:Arial Black;touch-action:none}#hud{position:fixed;top:0;left:0;right:0;padding:14px 16px;display:flex;justify-content:space-between;color:#fff;font-size:22px;text-shadow:0 2px 0 #000,2px 0 0 #000;z-index:10;background:linear-gradient(to bottom, rgba(0,0,0,.6), transparent)}#over{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;flex-direction:column;align-items:center;justify-content:center;color:#fff;z-index:20}.btn{margin-top:18px;background:#ffde00;padding:14px 32px;border-radius:30px;color:#000;font-size:20px;box-shadow:0 4
+<title>Subway Star Dash</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#000;overflow:hidden;font-family:Arial Black;touch-action:none}#hud{position:fixed;top:0;left:0;right:0;padding:14px 16px;display:flex;justify-content:space-between;color:#fff;font-size:22px;text-shadow:0 2px 0 #000;z-index:10;background:linear-gradient(to bottom,rgba(0,0,0,.6),transparent)}#over{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;flex-direction:column;align-items:center;justify-content:center;color:#fff;z-index:20}.btn{margin-top:18px;background:#ffde00;padding:14px 32px;border-radius:30px;color:#000;font-size:20px}</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
+</head>
+<body>
+<div id="hud"><div>⭐ <span id="c">0</span></div><div><span id="s">0</span>m</div></div>
+<div id="over"><h1 style="font-size:44px">BATEU!</h1><p id="f"></p><div class="btn" onclick="location.reload()">JOGAR DE NOVO</div></div>
+<script type="module">
+import * as THREE from 'three';
+const scene=new THREE.Scene(); scene.background=new THREE.Color(0xaaddff); scene.fog=new THREE.Fog(0xaaddff,40,110);
+const camera=new THREE.PerspectiveCamera(72,innerWidth/innerHeight,0.1,200);
+const renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setSize(innerWidth,innerHeight); document.body.appendChild(renderer.domElement);
+scene.add(new THREE.AmbientLight(0xffffff,0.95));
+const sun=new THREE.DirectionalLight(0xffffff,1.2); sun.position.set(10,20,10); scene.add(sun);
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(50,500),new THREE.MeshStandardMaterial({color:0x6d3a22})); floor.rotation.x=-Math.PI/2; floor.position.y=-1.5; floor.position.z=-50; scene.add(floor);
+for(let lane=-1;lane<=1;lane++){ const base=new THREE.Mesh(new THREE.BoxGeometry(3.2,0.2,500),new THREE.MeshStandardMaterial({color:0x5a2e18})); base.position.set(lane*3.4,-1.35,-50); scene.add(base); for(let z=0;z<50;z++){ const tie=new THREE.Mesh(new THREE.BoxGeometry(3.4,0.1,0.5),new THREE.MeshStandardMaterial({color:0x3d1f0f})); tie.position.set(lane*3.4,-1.25,z*-10+5); scene.add(tie);} const r1=new THREE.Mesh(new THREE.BoxGeometry(0.18,0.18,500),new THREE.MeshStandardMaterial({color:0xc0c8d0,metalness:0.8})); r1.position.set(lane*3.4-1,-1.05,-50); scene.add(r1); const r2=r1.clone(); r2.position.x=lane*3.4+1; scene.add(r2); }
+const pg=new THREE.Group(); const torso=new THREE.Mesh(new THREE.CapsuleGeometry(0.35,0.6,4,8),new THREE.MeshStandardMaterial({color:0xe6f0ff})); torso.position.y=0.6; pg.add(torso); const head=new THREE.Mesh(new THREE.SphereGeometry(0.38,16,16),new THREE.MeshStandardMaterial({color:0xffb17a})); head.position.y=1.35; pg.add(head); const cap=new THREE.Mesh(new THREE.SphereGeometry(0.4,16,16,0,Math.PI*2,0,Math.PI/2),new THREE.MeshStandardMaterial({color:0x0044ff})); cap.position.y=1.55; cap.rotation.x=Math.PI; pg.add(cap); const legM=new THREE.MeshStandardMaterial({color:0x2a5ab0}); const l1=new THREE.Mesh(new THREE.BoxGeometry(0.22,0.7,0.22),legM); l1.position.set(-0.18,0.05,0); const l2=l1.clone(); l2.position.x=0.18; pg.add(l1,l2); pg.position.set(0,0,6); scene.add
