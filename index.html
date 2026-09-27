@@ -1,39 +1,32 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>Brasil x Argentina - Penalty</title>
-<style>*{margin:0;padding:0}body{background:#0a3d1a;overflow:hidden;font-family:Arial Black;touch-action:none}
-canvas{display:block;margin:0 auto} #hud{position:fixed;top:0;left:0;right:0;padding:8px 10px;display:flex;justify-content:space-between;color:#fff;font-size:16px;background:#0009;z-index:10}</style>
-</head><body>
-<div id="hud"><span>🇧🇷 <b id="br">0</b> x <b id="ar">0</b> 🇦🇷</span><span id="turn">VOCÊ CHUTA</span></div>
-<canvas id="cv" width="360" height="640"></canvas>
-<script>
-let C=document.getElementById('cv'),X=C.getContext('2d'),W=360,H=640;
-let br=0,ar=0,myTurn=true,aimX=180,aimY=90,dirX=2.2,dirY=1.4,pow=0,st='aim',ball={x:180,y:530,r:12},gk={x:180,y:100,tx:180},anim=0;
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Penalti FIX</title><style>html,body{margin:0;padding:0;background:#0a3d1a;height:100%}canvas{display:block;width:100%;max-width:400px;margin:0 auto;background:#3db553}#top{height:38px;background:#000;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:0 12px;font-family:Arial Black;font-size:16px}</style>
+</head><body><div id="top"><span>🇧🇷 <b id="b">0</b> x <b id="a">0</b> 🇦🇷</span><span id="t">VOCÊ CHUTA</span></div><canvas id="cv" width="360" height="600"></canvas><script>
+let cv=document.getElementById('cv'),ctx=cv.getContext('2d'),W=360,H=600,br=0,ar=0,ax=180,ay=80,dx=2,dy=1.6,pw=0,st=0,bx=180,by=500,brad=13,gx=180,gtx=180;
 function draw(){
-X.fillStyle='#3aa655';X.fillRect(0,0,W,H); X.fillStyle='#2d8a44';for(let i=0;i<H;i+=32)X.fillRect(0,i,W,16);
-X.fillStyle='#fff';X.fillRect(25,15,W-50,6);X.fillRect(25,15,6,140);X.fillRect(W-31,15,6,140);
-X.fillStyle='rgba(255,255,255,.25)';X.fillRect(31,21,W-62,128);
-X.strokeStyle='rgba(255,255,255,.15)';for(let i=0;i<7;i++){X.beginPath();X.moveTo(31+i*44,21);X.lineTo(31+i*44,149);X.stroke();}
-// mira poki
-if(st=='aim'||st=='pow'){X.strokeStyle='#ff0';X.lineWidth=3;X.beginPath();X.arc(aimX,aimY,20,0,7);X.stroke();X.fillStyle='#f00';X.beginPath();X.arc(aimX,aimY,5,0,7);X.fill();X.strokeStyle='#fff';X.lineWidth=2;X.beginPath();X.moveTo(aimX-14,aimY);X.lineTo(aimX+14,aimY);X.moveTo(aimX,aimY-14);X.lineTo(aimX,aimY+14);X.stroke();}
-// goleiro Argentina
-let gx=gk.x,gy=gk.y; X.fillStyle=myTurn?'#75aadb':'#ffcc00'; X.fillRect(gx-15,gy,30,32); // azul argentina ou amarelo brasil
-X.fillStyle='#fff';X.fillRect(gx-10,gy+6,20,6); X.fillStyle='#ffb17a';X.beginPath();X.arc(gx,gy-5,11,0,7);X.fill();
-X.fillStyle='#fff';X.fillRect(gx-18,gy+10,9,7);X.fillRect(gx+9,gy+10,9,7);
-X.fillStyle='#000';X.fillRect(gx-10,gy+24,7,16);X.fillRect(gx+3,gy+24,7,16);
-gk.x+=(gk.tx-gk.x)*0.15;
-// bola
-X.fillStyle='#fff';X.beginPath();X.arc(ball.x,ball.y,ball.r,0,7);X.fill();X.fillStyle='#000';X.beginPath();X.arc(ball.x,ball.y,4.5,0,7);X.fill();
-// power
-if(st=='pow'){X.fillStyle='#000';X.fillRect(15,H-70,W-30,16);X.fillStyle=pow>80?'#f00':pow>50?'#ff0':'#0f0';X.fillRect(15,H-70,pow*3.3,16);X.fillStyle='#fff';X.strokeRect(15,H-70,W-30,16);}
-X.fillStyle='#fff';X.font='bold 12px Arial';X.textAlign='center';
-if(st=='aim')X.fillText('1º TOQUE: TRAVA A MIRA',180,H-18);
-if(st=='pow')X.fillText('2º TOQUE: FORÇA (NO VERDE!)',180,H-18);
+ctx.fillStyle='#3db553';ctx.fillRect(0,0,W,H);ctx.fillStyle='#2e9a45';for(let i=0;i<H;i+=28){ctx.fillRect(0,i,W,14);}
+ctx.fillStyle='#fff';ctx.fillRect(25,10,W-50,6);ctx.fillRect(25,10,6,120);ctx.fillRect(W-31,10,6,120);
+ctx.fillStyle='rgba(255,255,255,0.3)';ctx.fillRect(31,16,W-62,114);
+ctx.strokeStyle='rgba(255,255,255,0.2)';ctx.lineWidth=1;for(let i=0;i<7;i++){ctx.beginPath();ctx.moveTo(31+i*42,16);ctx.lineTo(31+i*42,130);ctx.stroke();}
+if(st==0||st==1){ctx.strokeStyle='#ffff00';ctx.lineWidth=3;ctx.beginPath();ctx.arc(ax,ay,20,0,6.28);ctx.stroke();ctx.fillStyle='#ff0000';ctx.beginPath();ctx.arc(ax,ay,6,0,6.28);ctx.fill();}
+ctx.fillStyle='#75aadb';ctx.fillRect(gx-16,80,32,30);ctx.fillStyle='#fff';ctx.fillRect(gx-11,86,22,6);
+ctx.fillStyle='#ffcc99';ctx.beginPath();ctx.arc(gx,72,12,0,6.28);ctx.fill();
+gx+=(gtx-gx)*0.12;
+ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(bx,by,brad,0,6.28);ctx.fill();ctx.fillStyle='#000';ctx.beginPath();ctx.arc(bx,by,5,0,6.28);ctx.fill();
+if(st==1){ctx.fillStyle='#000';ctx.fillRect(15,H-50,W-30,16);ctx.fillStyle=pw>70?'#ff0000':'#00ff00';ctx.fillRect(15,H-50,pw*3.3,16);}
+ctx.fillStyle='#fff';ctx.font='bold 12px Arial';ctx.textAlign='center';
+ctx.fillText(st==0?'TOQUE: TRAVAR MIRA':st==1?'TOQUE: CHUTAR!':'',180,H-15);
 }
-function reset(){ball={x:180,y:530,r:12};st='aim';pow=0;gk={x:180,y:100,tx:180};aimX=180;aimY=90;}
-function cpuShoot(){
-myTurn=false;document.getElementById('turn').innerText='GOLEIRO DEFENDE!';st='cpu';
-let cpuAimX=50+Math.random()*(W-100), cpuAimY=30+Math.random()*100;
-gk.tx=cpuAimX+(Math.random()*60-30); ball.x=180; ball.y=530;
-let iv=setInterval(()=>{ball.x+=(cpuAimX-ball.x)*0.07;ball.y+=(cpuAimY-ball.y)*0.07;ball.r-=0.07;draw();
-if(Math.abs(ball.x-cpuAimX)<3){clearInterval(iv
+function reset(){bx=180;by=500;brad=13;st=0;pw=0;ax=180;ay=80;gx=180;gtx=180;}
+function loop(){
+if(st==0){ax+=dx;ay+=dy;if(ax<45||ax>W-45)dx*=-1;if(ay<30||ay>120)dy*=-1;}
+if(st==1){pw+=3;if(pw>100)pw=0;}
+if(st==2){bx+=(ax-bx)*0.07;by+=(ay-by)*0.07;brad-=0.07;if(Math.abs(bx-ax)<3){
+if(Math.abs(bx-gx)<34){ar++;document.getElementById('a').innerText=ar;ctx.fillStyle='#fff';ctx.font='bold 28px Arial';ctx.fillText('DEFENDEU!',80,300);}
+else{br++;document.getElementById('b').innerText=br;ctx.fillStyle='#ffff00';ctx.font='bold 28px Arial';ctx.fillText('GOOOL!',90,300);}
+st=3;setTimeout(reset,1000);}}
+draw();requestAnimationFrame(loop);
+}
+cv.addEventListener('touchstart',e=>{e.preventDefault();if(st==0){st=1;gtx=40+Math.random()*(W-80);if(Math.random()<0.7)gtx=ax+(Math.random()*40-20);}else if(st==1){st=2;}}, {passive:false});
+cv.addEventListener('click',()=>{if(st==0){st=1;gtx=40+Math.random()*(W-80);}else if(st==1){st=2;}});
+loop();
+</script></body></html>
