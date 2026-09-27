@@ -109,3 +109,10 @@ update();
 </script>
 </body>
 </html>
+function addO(){let l=Math.floor(Math.random()*3);obs.push({l:l,y:-60,t:Math.random()<0.6?'t':'b',c:Math.random()<0.33?'#ffcc00':Math.random()<0.5?'#ff4444':'#555'});}
+function addC(){cls.push({l:Math.floor(Math.random()*3),y:-40});}
+function loop(){if(!game)return;score+=speed*0.1;speed+=0.002;document.getElementById('s').innerText=Math.floor(score);document.getElementById('c').innerText=coins;track();if(Math.random()<0.03)addO();if(Math.random()<0.06)addC();for(let o of obs){o.y+=speed;let x=lanes[o.l];if(o.t=='t'){cx.fillStyle=o.c;cx.fillRect(x-35,o.y,70,45);cx.fillStyle='#87ceeb';cx.beginPath();cx.arc(x,o.y+15,8,0,7);cx.fill();}else{cx.fillStyle='#d22';cx.fillRect(x-35,o.y+20,70,14);}if(Math.abs(o.y-py)<28&&o.l==lane){alert('BATEU! '+Math.floor(score)+'m | '+coins+' estrelas');location.reload();return;}}for(let c of cls){c.y+=speed;coin(lanes[c.l],c.y);if(Math.abs(c.y-py)<28&&c.l==lane){coins++;c.y=1000;}}obs=obs.filter(o=>o.y<H+60);cls=cls.filter(c=>c.y<H+60);player();requestAnimationFrame(loop);}
+cv.addEventListener('touchstart',e=>tx=e.touches[0].clientX);cv.addEventListener('touchend',e=>{let dx=e.changedTouches[0].clientX-tx;if(dx>30&&lane<2)lane++;if(dx<-30&&lane>0)lane--;});
+addEventListener('keydown',e=>{if(e.key=='ArrowLeft'&&lane>0)lane--;if(e.key=='ArrowRight'&&lane<2)lane++;});
+loop();
+</script></body></html>
