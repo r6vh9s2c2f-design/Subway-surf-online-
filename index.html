@@ -1,75 +1,691 @@
-<!DOCTYPE html><html lang="pt"><head><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>Bubble Shooter Brasil</title>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#111111">
+<title>Rifa Online</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}body{background:#0a1020;color:#fff;font-family:Arial Black;overflow:hidden}
-#top{height:46px;background:linear-gradient(#1a2a5a,#0a1020);display:flex;justify-content:space-between;align-items:center;padding:0 12px;border-bottom:3px solid #ffcc00}
-#game{width:100%;max-width:400px;height:100vh;margin:0 auto;display:flex;flex-direction:column}
-canvas{flex:1;width:100%;display:block;background:radial-gradient(#1a3a7a,#0a1020)}
-#aim{position:absolute;bottom:110px;left:50%;transform:translateX(-50%);width:70px;height:70px;border-radius:50%;background:radial-gradient(#fff,#ddd);border:3px solid #000;box-shadow:0 0 15px rgba(255,255,255,0.6)}
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+}
+body {
+    background: #f4f4f5;
+    color: #111;
+}
+button, input {
+    font: inherit;
+}
+.header {
+    background: #111;
+    color: white;
+    padding: 18px 16px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+.header h1 {
+    font-size: 21px;
+}
+.container {
+    width: 100%;
+    max-width: 900px;
+    margin: auto;
+    padding: 16px;
+}
+.hero {
+    background: white;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,.08);
+    margin-bottom: 16px;
+}
+.prize {
+    background: linear-gradient(135deg,#111,#333);
+    color: white;
+    padding: 32px 20px;
+    text-align: center;
+}
+.prize .tag {
+    display: inline-block;
+    background: #fff;
+    color: #111;
+    padding: 6px 12px;
+    border-radius: 50px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+.prize h2 {
+    font-size: 27px;
+    line-height: 1.15;
+    margin-bottom: 10px;
+}
+.prize p {
+    opacity: .85;
+}
+.info {
+    padding: 20px;
+}
+.price {
+    text-align: center;
+    font-size: 30px;
+    font-weight: 800;
+    margin-bottom: 15px;
+}
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    margin-bottom: 7px;
+}
+.progress {
+    height: 12px;
+    background: #e5e7eb;
+    border-radius: 20px;
+    overflow: hidden;
+}
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: #111;
+    transition: .3s;
+}
+.section {
+    background: white;
+    padding: 20px;
+    border-radius: 18px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.06);
+}
+.section h3 {
+    margin-bottom: 15px;
+}
+.numbers {
+    display: grid;
+    grid-template-columns: repeat(5,1fr);
+    gap: 7px;
+}
+.number {
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 9px;
+    padding: 10px 3px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.number:hover {
+    background: #f1f1f1;
+}
+.number.selected {
+    background: #111;
+    color: white;
+    border-color: #111;
+}
+.number.sold {
+    background: #ddd;
+    color: #888;
+    cursor: not-allowed;
+    text-decoration: line-through;
+}
+.legend {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+    font-size: 12px;
+}
+.legend span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 4px;
+    display: inline-block;
+    border: 1px solid #ccc;
+}
+.dot.available {
+    background: white;
+}
+.dot.selected {
+    background: #111;
+}
+.dot.sold {
+    background: #ddd;
+}
+.checkout {
+    position: sticky;
+    bottom: 0;
+    background: rgba(255,255,255,.96);
+    backdrop-filter: blur(10px);
+    padding: 14px 16px;
+    border-top: 1px solid #ddd;
+    z-index: 20;
+}
+.checkout-inner {
+    max-width: 900px;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+.total small {
+    display: block;
+    color: #666;
+}
+.total strong {
+    font-size: 22px;
+}
+.btn {
+    border: 0;
+    border-radius: 12px;
+    padding: 14px 20px;
+    background: #111;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+}
+.btn:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+}
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+    z-index: 100;
+}
+.modal.active {
+    display: flex;
+}
+.modal-box {
+    background: white;
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow: auto;
+    border-radius: 20px;
+    padding: 22px;
+}
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.close {
+    border: 0;
+    background: #eee;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+input {
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 13px;
+    margin-bottom: 14px;
+    outline: none;
+}
+input:focus {
+    border-color: #111;
+}
+.pix {
+    background: #f3f4f6;
+    border-radius: 12px;
+    padding: 15px;
+    word-break: break-all;
+    font-size: 12px;
+    margin: 15px 0;
+}
+.admin {
+    display: none;
+}
+.admin.active {
+    display: block;
+}
+.admin-list {
+    max-height: 300px;
+    overflow: auto;
+    border: 1px solid #eee;
+    border-radius: 10px;
+}
+.admin-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 13px;
+}
+.admin-item:last-child {
+    border-bottom: 0;
+}
+.danger {
+    background: #b91c1c;
+}
+.success {
+    color: #16803c;
+    font-weight: 700;
+}
+footer {
+    text-align: center;
+    padding: 30px 15px 110px;
+    color: #777;
+    font-size: 12px;
+}
+@media (min-width: 700px) {
+    .numbers {
+        grid-template-columns: repeat(10,1fr);
+    }
+}
 </style>
-</head><body>
-<div id="game">
-<div id="top"><span>⭐ <b id="score">0</b></span><span style="color:#ff0">BUBBLE BRASIL</span><span>⏱ <b id="time">60</b></span></div>
-<div style="position:relative;flex:1">
-<canvas id="c" width="400" height="700"></canvas>
+</head>
+<body>
+<header class="header">
+    <h1>🎟️ RIFA ONLINE</h1>
+</header>
+<main class="container">
+    <section class="hero">
+        <div class="prize">
+            <div class="tag">PRÊMIO</div>
+            <h2>2 Tênis Lacoste Europa Pro<br>ou R$ 500 no Pix</h2>
+            <p>Escolha seus números e participe.</p>
+        </div>
+        <div class="info">
+            <div class="price">
+                R$ 5,00
+            </div>
+            <div class="progress-info">
+                <span id="soldText">0 vendidos</span>
+                <span id="percentText">0%</span>
+            </div>
+            <div class="progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+        </div>
+    </section>
+    <section class="section">
+        <h3>Escolha seus números</h3>
+        <div class="numbers" id="numbers"></div>
+        <div class="legend">
+            <span>
+                <i class="dot available"></i>
+                Disponível
+            </span>
+            <span>
+                <i class="dot selected"></i>
+                Selecionado
+            </span>
+            <span>
+                <i class="dot sold"></i>
+                Vendido
+            </span>
+        </div>
+    </section>
+    <section class="section">
+        <h3>Como participar?</h3>
+        <p style="line-height:1.6;color:#555">
+            1. Escolha seus números.<br>
+            2. Informe seus dados.<br>
+            3. Gere o pagamento Pix.<br>
+            4. Após a confirmação, seus números ficam reservados para você.
+        </p>
+    </section>
+    <!-- ÁREA ADMINISTRATIVA -->
+    <section class="section admin" id="admin">
+        <h3>🔐 Administração</h3>
+        <p style="margin-bottom:15px;color:#666">
+            Controle local dos números vendidos.
+        </p>
+        <button class="btn danger" onclick="resetarRifa()">
+            Resetar todos os números
+        </button>
+        <br><br>
+        <div class="admin-list" id="adminList"></div>
+    </section>
+</main>
+<footer>
+    Rifa Online • Versão demonstrativa
+</footer>
+<div class="checkout">
+    <div class="checkout-inner">
+        <div class="total">
+            <small>
+                <span id="selectedCount">0</span> números selecionados
+            </small>
+            <strong id="total">
+                R$ 0,00
+            </strong>
+        </div>
+        <button
+            class="btn"
+            id="continueBtn"
+            disabled
+            onclick="abrirCheckout()">
+            Continuar
+        </button>
+    </div>
 </div>
+<!-- MODAL CHECKOUT -->
+<div class="modal" id="checkoutModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2>Finalizar pedido</h2>
+            <button
+                class="close"
+                onclick="fecharModal('checkoutModal')">
+                ×
+            </button>
+        </div>
+        <p style="margin-bottom:15px;color:#555">
+            Números escolhidos:
+        </p>
+        <div id="checkoutNumbers"
+             style="font-weight:700;margin-bottom:20px">
+        </div>
+        <label>Nome completo</label>
+        <input
+            id="name"
+            type="text"
+            placeholder="Digite seu nome">
+        <label>WhatsApp</label>
+        <input
+            id="phone"
+            type="tel"
+            placeholder="(11) 99999-9999">
+        <label>CPF</label>
+        <input
+            id="cpf"
+            type="text"
+            placeholder="000.000.000-00">
+        <button
+            class="btn"
+            style="width:100%"
+            onclick="gerarPix()">
+            Gerar pagamento Pix
+        </button>
+        <div id="pixArea" style="display:none">
+            <hr style="margin:20px 0;border:0;border-top:1px solid #eee">
+            <h3>Pagamento Pix</h3>
+            <p style="margin-top:8px;color:#666">
+                Copie o código abaixo para realizar o pagamento.
+            </p>
+            <div class="pix" id="pixCode"></div>
+            <button
+                class="btn"
+                style="width:100%"
+                onclick="copiarPix()">
+                Copiar Pix
+            </button>
+            <p
+                id="copyMessage"
+                style="text-align:center;margin-top:10px"
+                class="success">
+            </p>
+        </div>
+    </div>
 </div>
 <script>
-const cv=document.getElementById('c'),X=cv.getContext('2d'),W=400,H=700;
-let bubbles=[],nextColor,curX=200,curY=620,aimX=200,aimY=200,aiming=false,score=0,time=60;
-let colors=['#ff2a2a','#2aff2a','#2a7aff','#ffeb2a','#ff2aff','#2affff'];
-let cols=10,rows=8,rad=18;
-
-function randCol(){return colors[Math.floor(Math.random()*colors.length)];}
-function init(){
- bubbles=[];for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){if(r>4&&Math.random()<0.3)continue;let x=20+c*36+(r%2)*18,y=20+r*32;bubbles.push({x,y,c:randCol(),alive:true});}
- nextColor=randCol();time=60;score=0;
+const CONFIG = {
+    totalNumeros: 500,
+    preco: 5,
+    /* 
+       TROQUE ESTE TEXTO PELO SEU PIX
+       SOMENTE QUANDO FOR INTEGRAR PAGAMENTO REAL.
+    */
+    pixDemo: "00020126580014BR.GOV.BCB.PIX0136RIFA-DEMO-NAO-E-UM-PAGAMENTO-REAL"
+};
+let vendidos =
+    JSON.parse(localStorage.getItem("rifa_vendidos")) || {};
+let selecionados = [];
+function salvar() {
+    localStorage.setItem(
+        "rifa_vendidos",
+        JSON.stringify(vendidos)
+    );
 }
-function draw(){
- X.clearRect(0,0,W,H);
- // grid
- bubbles.forEach(b=>{if(!b.alive)return;
-  X.fillStyle='rgba(0,0,0,0.4)';X.beginPath();X.arc(b.x+3,b.y+4,rad,0,7);X.fill();
-  X.fillStyle=b.c;X.beginPath();X.arc(b.x,b.y,rad,0,7);X.fill();
-  X.fillStyle='rgba(255,255,255,0.6)';X.beginPath();X.arc(b.x-5,b.y-5,5,0,7);X.fill();
- });
- // aim line
- if(aiming){X.strokeStyle='#fff';X.setLineDash([8,6]);X.lineWidth=2;X.beginPath();X.moveTo(curX,curY);X.lineTo(aimX,aimY);X.stroke();X.setLineDash([]);
-  X.strokeStyle='#ffff00';X.lineWidth=2;X.beginPath();X.arc(aimX,aimY,18,0,7);X.stroke();}
- // current bubble
- X.fillStyle=nextColor;X.beginPath();X.arc(curX,curY,rad+3,0,7);X.fill();
- X.fillStyle='rgba(255,255,255,0.8)';X.beginPath();X.arc(curX-4,curY-4,5,0,7);X.fill();
- X.strokeStyle='#fff';X.lineWidth=2.5;X.stroke();
+function formatarNumero(numero) {
+    return String(numero).padStart(3, "0");
 }
-function getClosest(x,y){let best=null,dist=999;bubbles.forEach(b=>{if(!b.alive)return;let d=Math.hypot(b.x-x,b.y-y);if(d<dist){dist=d;best=b;}});return best;}
-
-function shoot(){
- let dx=aimX-curX,dy=aimY-curY,d=Math.hypot(dx,dy);dx/=d;dy/=d;
- let bx=curX,by=curY,steps=0;
- let iv=setInterval(()=>{
-  bx+=dx*12;by+=dy*12;steps++;
-  if(bx<rad||bx>W-rad)dx*=-1;
-  if(by<30){clearInterval(iv);place(bx,by);return;}
-  let hit=bubbles.find(b=>b.alive&&Math.hypot(b.x-bx,b.y-by)<rad*1.9);
-  if(hit||steps>80){clearInterval(iv);place(bx,by);}
- },16);
+function renderizarNumeros() {
+    const container =
+        document.getElementById("numbers");
+    container.innerHTML = "";
+    for (let i = 1; i <= CONFIG.totalNumeros; i++) {
+        const numero =
+            formatarNumero(i);
+        const button =
+            document.createElement("button");
+        button.className = "number";
+        button.textContent = numero;
+        if (vendidos[numero]) {
+            button.classList.add("sold");
+            button.disabled = true;
+        }
+        if (selecionados.includes(numero)) {
+            button.classList.add("selected");
+        }
+        button.onclick = () =>
+            selecionarNumero(numero);
+        container.appendChild(button);
+    }
+    atualizarResumo();
 }
-function place(x,y){
- let nb={x,y:Math.max(20,y),c:nextColor,alive:true};bubbles.push(nb);nextColor=randCol();
- checkPop(nb);
+function selecionarNumero(numero) {
+    if (vendidos[numero]) return;
+    if (selecionados.includes(numero)) {
+        selecionados =
+            selecionados.filter(n => n !== numero);
+    } else {
+        selecionados.push(numero);
+    }
+    renderizarNumeros();
 }
-function checkPop(start){
- let same=[start],queue=[start],vis=new Set([start]);
- while(queue.length){let cur=queue.pop();bubbles.forEach(b=>{if(!b.alive||vis.has(b)||b.c!==cur.c)return;if(Math.hypot(b.x-cur.x,b.y-cur.y)<38){vis.add(b);same.push(b);queue.push(b);}});}
- if(same.length>=3){same.forEach(b=>b.alive=false);score+=same.length*10;document.getElementById('score').innerText=score;}
+function atualizarResumo() {
+    const quantidade =
+        selecionados.length;
+    const total =
+        quantidade * CONFIG.preco;
+    document.getElementById(
+        "selectedCount"
+    ).textContent = quantidade;
+    document.getElementById(
+        "total"
+    ).textContent =
+        "R$ " + total.toFixed(2).replace(".", ",");
+    document.getElementById(
+        "continueBtn"
+    ).disabled = quantidade === 0;
+    const vendidosCount =
+        Object.keys(vendidos).length;
+    const porcentagem =
+        (vendidosCount / CONFIG.totalNumeros) * 100;
+    document.getElementById(
+        "soldText"
+    ).textContent =
+        vendidosCount + " vendidos";
+    document.getElementById(
+        "percentText"
+    ).textContent =
+        porcentagem.toFixed(0) + "%";
+    document.getElementById(
+        "progressBar"
+    ).style.width =
+        porcentagem + "%";
 }
-cv.addEventListener('touchstart',e=>{let t=e.touches[0],r=cv.getBoundingClientRect();aimX=(t.clientX-r.left)*(W/r.width);aimY=(t.clientY-r.top)*(H/r.height);aiming=true;});
-cv.addEventListener('touchmove',e=>{let t=e.touches[0],r=cv.getBoundingClientRect();aimX=(t.clientX-r.left)*(W/r.width);aimY=(t.clientY-r.top)*(H/r.height);});
-cv.addEventListener('touchend',()=>{if(aiming){aiming=false;shoot();}});
-cv.addEventListener('mousedown',e=>{let r=cv.getBoundingClientRect();aimX=(e.clientX-r.left)*(W/r.width);aimY=(e.clientY-r.top)*(H/r.height);aiming=true;});
-cv.addEventListener('mousemove',e=>{if(!aiming)return;let r=cv.getBoundingClientRect();aimX=(e.clientX-r.left)*(W/r.width);aimY=(e.clientY-r.top)*(H/r.height);});
-cv.addEventListener('mouseup',()=>{if(aiming){aiming=false;shoot();}});
-setInterval(()=>{if(time>0){time--;document.getElementById('time').innerText=time;} },1000);
-init();(function loop(){draw();requestAnimationFrame(loop);})();
-</script></body></html>
+function abrirCheckout() {
+    document.getElementById(
+        "checkoutNumbers"
+    ).textContent =
+        selecionados.join(", ");
+    document.getElementById(
+        "pixArea"
+    ).style.display = "none";
+    document.getElementById(
+        "checkoutModal"
+    ).classList.add("active");
+}
+function fecharModal(id) {
+    document.getElementById(id)
+        .classList.remove("active");
+}
+function gerarPix() {
+    const nome =
+        document.getElementById("name").value.trim();
+    const telefone =
+        document.getElementById("phone").value.trim();
+    const cpf =
+        document.getElementById("cpf").value.trim();
+    if (!nome || !telefone || !cpf) {
+        alert("Preencha todos os campos.");
+        return;
+    }
+    /*
+       DEMONSTRAÇÃO:
+       Este código não realiza cobrança.
+    */
+    document.getElementById(
+        "pixCode"
+    ).textContent =
+        CONFIG.pixDemo;
+    document.getElementById(
+        "pixArea"
+    ).style.display = "block";
+    /*
+       Para a demonstração,
+       os números são marcados como vendidos
+       somente depois da geração do Pix.
+    */
+    selecionados.forEach(numero => {
+        vendidos[numero] = {
+            nome: nome,
+            telefone: telefone,
+            cpf: cpf,
+            data: new Date().toLocaleString("pt-BR")
+        };
+    });
+    salvar();
+    atualizarAdmin();
+    alert(
+        "Pedido criado!\n\n" +
+        "Nesta versão o Pix é apenas demonstrativo."
+    );
+    selecionados = [];
+    renderizarNumeros();
+}
+function copiarPix() {
+    const codigo =
+        document.getElementById("pixCode")
+        .textContent;
+    navigator.clipboard.writeText(codigo)
+        .then(() => {
+            document.getElementById(
+                "copyMessage"
+            ).textContent =
+                "Código copiado!";
+        });
+}
+function atualizarAdmin() {
+    const lista =
+        document.getElementById("adminList");
+    lista.innerHTML = "";
+    const numeros =
+        Object.keys(vendidos)
+        .sort((a,b) => Number(a)-Number(b));
+    if (numeros.length === 0) {
+        lista.innerHTML =
+            "<div class='admin-item'>Nenhum número vendido.</div>";
+        return;
+    }
+    numeros.forEach(numero => {
+        const venda =
+            vendidos[numero];
+        const item =
+            document.createElement("div");
+        item.className = "admin-item";
+        item.innerHTML = `
+            <div>
+                <strong>${numero}</strong><br>
+                ${venda.nome}<br>
+                ${venda.telefone}
+            </div>
+            <button
+                class="btn danger"
+                style="padding:7px 10px"
+                onclick="cancelarVenda('${numero}')">
+                Liberar
+            </button>
+        `;
+        lista.appendChild(item);
+    });
+}
+function cancelarVenda(numero) {
+    if (
+        confirm(
+            "Liberar o número " +
+            numero +
+            "?"
+        )
+    ) {
+        delete vendidos[numero];
+        salvar();
+        renderizarNumeros();
+        atualizarAdmin();
+    }
+}
+function resetarRifa() {
+    if (
+        confirm(
+            "Tem certeza que deseja apagar todas as vendas?"
+        )
+    ) {
+        vendidos = {};
+        selecionados = [];
+        salvar();
+        renderizarNumeros();
+        atualizarAdmin();
+    }
+}
+/*
+   ACESSO ADMINISTRATIVO DEMONSTRATIVO
+   Para abrir:
+   acrescente #admin na URL.
+   Exemplo:
+   seu-site.github.io/rifa/#admin
+*/
+function verificarAdmin() {
+    if (
+        window.location.hash === "#admin"
+    ) {
+        document.getElementById(
+            "admin"
+        ).classList.add("active");
+        atualizarAdmin();
+    }
+}
+renderizarNumeros();
+verificarAdmin();
+</script>
+</body>
+</html>
