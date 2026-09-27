@@ -1,32 +1,30 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>Penalti FIX</title><style>html,body{margin:0;padding:0;background:#0a3d1a;height:100%}canvas{display:block;width:100%;max-width:400px;margin:0 auto;background:#3db553}#top{height:38px;background:#000;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:0 12px;font-family:Arial Black;font-size:16px}</style>
-</head><body><div id="top"><span>🇧🇷 <b id="b">0</b> x <b id="a">0</b> 🇦🇷</span><span id="t">VOCÊ CHUTA</span></div><canvas id="cv" width="360" height="600"></canvas><script>
-let cv=document.getElementById('cv'),ctx=cv.getContext('2d'),W=360,H=600,br=0,ar=0,ax=180,ay=80,dx=2,dy=1.6,pw=0,st=0,bx=180,by=500,brad=13,gx=180,gtx=180;
-function draw(){
-ctx.fillStyle='#3db553';ctx.fillRect(0,0,W,H);ctx.fillStyle='#2e9a45';for(let i=0;i<H;i+=28){ctx.fillRect(0,i,W,14);}
-ctx.fillStyle='#fff';ctx.fillRect(25,10,W-50,6);ctx.fillRect(25,10,6,120);ctx.fillRect(W-31,10,6,120);
-ctx.fillStyle='rgba(255,255,255,0.3)';ctx.fillRect(31,16,W-62,114);
-ctx.strokeStyle='rgba(255,255,255,0.2)';ctx.lineWidth=1;for(let i=0;i<7;i++){ctx.beginPath();ctx.moveTo(31+i*42,16);ctx.lineTo(31+i*42,130);ctx.stroke();}
-if(st==0||st==1){ctx.strokeStyle='#ffff00';ctx.lineWidth=3;ctx.beginPath();ctx.arc(ax,ay,20,0,6.28);ctx.stroke();ctx.fillStyle='#ff0000';ctx.beginPath();ctx.arc(ax,ay,6,0,6.28);ctx.fill();}
-ctx.fillStyle='#75aadb';ctx.fillRect(gx-16,80,32,30);ctx.fillStyle='#fff';ctx.fillRect(gx-11,86,22,6);
-ctx.fillStyle='#ffcc99';ctx.beginPath();ctx.arc(gx,72,12,0,6.28);ctx.fill();
-gx+=(gtx-gx)*0.12;
-ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(bx,by,brad,0,6.28);ctx.fill();ctx.fillStyle='#000';ctx.beginPath();ctx.arc(bx,by,5,0,6.28);ctx.fill();
-if(st==1){ctx.fillStyle='#000';ctx.fillRect(15,H-50,W-30,16);ctx.fillStyle=pw>70?'#ff0000':'#00ff00';ctx.fillRect(15,H-50,pw*3.3,16);}
-ctx.fillStyle='#fff';ctx.font='bold 12px Arial';ctx.textAlign='center';
-ctx.fillText(st==0?'TOQUE: TRAVAR MIRA':st==1?'TOQUE: CHUTAR!':'',180,H-15);
-}
-function reset(){bx=180;by=500;brad=13;st=0;pw=0;ax=180;ay=80;gx=180;gtx=180;}
-function loop(){
-if(st==0){ax+=dx;ay+=dy;if(ax<45||ax>W-45)dx*=-1;if(ay<30||ay>120)dy*=-1;}
-if(st==1){pw+=3;if(pw>100)pw=0;}
-if(st==2){bx+=(ax-bx)*0.07;by+=(ay-by)*0.07;brad-=0.07;if(Math.abs(bx-ax)<3){
-if(Math.abs(bx-gx)<34){ar++;document.getElementById('a').innerText=ar;ctx.fillStyle='#fff';ctx.font='bold 28px Arial';ctx.fillText('DEFENDEU!',80,300);}
-else{br++;document.getElementById('b').innerText=br;ctx.fillStyle='#ffff00';ctx.font='bold 28px Arial';ctx.fillText('GOOOL!',90,300);}
-st=3;setTimeout(reset,1000);}}
-draw();requestAnimationFrame(loop);
-}
-cv.addEventListener('touchstart',e=>{e.preventDefault();if(st==0){st=1;gtx=40+Math.random()*(W-80);if(Math.random()<0.7)gtx=ax+(Math.random()*40-20);}else if(st==1){st=2;}}, {passive:false});
-cv.addEventListener('click',()=>{if(st==0){st=1;gtx=40+Math.random()*(W-80);}else if(st==1){st=2;}});
-loop();
-</script></body></html>
+<!DOCTYPE html><html><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Penalty 3D Brasil x Argentina</title>
+<style>html,body{margin:0;padding:0;background:#001a00;overflow:hidden;height:100%} #top{height:40px;background:linear-gradient(#222,#000);color:#fff;display:flex;justify-content:space-between;align-items:center;padding:0 12px;font-family:Arial Black;font-size:18px;border-bottom:3px solid #ffcc00} canvas{display:block;width:100%;max-width:420px;margin:0 auto;background:radial-gradient(#5fd35f,#2a8a2a)}</style>
+</head><body>
+<div id="top"><span>🇧🇷 <b id="b">0</b> x <b id="a">0</b> 🇦🇷</span><span id="t" style="color:#ff0">VOCÊ CHUTA</span></div>
+<canvas id="cv" width="420" height="680"></canvas>
+<script>
+let cv=document.getElementById('cv'),X=cv.getContext('2d'),W=420,H=680;
+let br=0,ar=0,ax=210,ay=110,dx=2.8,dy=2,pow=0,st=0,bx=210,by=560,bs=1,gx=210,gtx=210,gkJump=0,confetti=[];
+function drawStadium(){
+ // ceu
+ let g=X.createLinearGradient(0,0,0,120);g.addColorStop(0,'#87ceeb');g.addColorStop(1,'#e0f6ff');X.fillStyle=g;X.fillRect(0,0,W,130);
+ // arquibancada - torcida 3D
+ X.fillStyle='#1a4a8a';X.fillRect(0,0,W,40);X.fillStyle='#2a5a9a';X.fillRect(0,40,W,50);
+ for(let i=0;i<80;i++){let x=(i*53)%W,y=10+(i%3)*18;X.fillStyle=i%2?'#ffcc00':'#fff';X.fillRect(x,y,8,8);X.fillStyle=i%3==0?'#009739':'#75aadb';X.fillRect(x,y+8,8,5);}
+ // bandeiras
+ X.fillStyle='#009739';X.fillRect(10,95,70,14);X.fillStyle='#ffcc00';X.font='bold 10px Arial';X.fillText('BRASIL',15,105);
+ X.fillStyle='#75aadb';X.fillRect(W-80,95,70,14);X.fillStyle='#fff';X.fillText('ARGENTINA',W-78,105);
+ // campo em perspectiva 3D
+ X.fillStyle='#3cb44b';X.beginPath();X.moveTo(0,130);X.lineTo(W,130);X.lineTo(W, H);X.lineTo(0,H);X.fill();
+ X.fillStyle='#4ec85e';for(let i=130;i<H;i+=35){X.fillRect(0,i,W,18);}
+ // linhas do campo perspectiva
+ X.strokeStyle='#fff';X.lineWidth=2;X.strokeRect(20,140,W-40,90);
+ X.beginPath();X.moveTo(W/2,140);X.lineTo(W/2-80,H);X.moveTo(W/2,140);X.lineTo(W/2+80,H);X.stroke();
+ X.lineWidth=1;X.setLineDash([8,8]);X.beginPath();X.moveTo(0,250);X.lineTo(W,250);X.stroke();X.setLineDash([]);
+ // sombra do gol
+ X.fillStyle='rgba(0,0,0,0.3)';X.fillRect(45,145,W-90,12);
+ // GOL 3D com profundidade
+ X.fillStyle='#fff';X.fillRect(40,125,W-80,8); // travess
