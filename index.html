@@ -1,30 +1,75 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8">
+<!DOCTYPE html><html lang="pt"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>Penalty 3D Brasil x Argentina</title>
-<style>html,body{margin:0;padding:0;background:#001a00;overflow:hidden;height:100%} #top{height:40px;background:linear-gradient(#222,#000);color:#fff;display:flex;justify-content:space-between;align-items:center;padding:0 12px;font-family:Arial Black;font-size:18px;border-bottom:3px solid #ffcc00} canvas{display:block;width:100%;max-width:420px;margin:0 auto;background:radial-gradient(#5fd35f,#2a8a2a)}</style>
+<title>Bubble Shooter Brasil</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}body{background:#0a1020;color:#fff;font-family:Arial Black;overflow:hidden}
+#top{height:46px;background:linear-gradient(#1a2a5a,#0a1020);display:flex;justify-content:space-between;align-items:center;padding:0 12px;border-bottom:3px solid #ffcc00}
+#game{width:100%;max-width:400px;height:100vh;margin:0 auto;display:flex;flex-direction:column}
+canvas{flex:1;width:100%;display:block;background:radial-gradient(#1a3a7a,#0a1020)}
+#aim{position:absolute;bottom:110px;left:50%;transform:translateX(-50%);width:70px;height:70px;border-radius:50%;background:radial-gradient(#fff,#ddd);border:3px solid #000;box-shadow:0 0 15px rgba(255,255,255,0.6)}
+</style>
 </head><body>
-<div id="top"><span>🇧🇷 <b id="b">0</b> x <b id="a">0</b> 🇦🇷</span><span id="t" style="color:#ff0">VOCÊ CHUTA</span></div>
-<canvas id="cv" width="420" height="680"></canvas>
+<div id="game">
+<div id="top"><span>⭐ <b id="score">0</b></span><span style="color:#ff0">BUBBLE BRASIL</span><span>⏱ <b id="time">60</b></span></div>
+<div style="position:relative;flex:1">
+<canvas id="c" width="400" height="700"></canvas>
+</div>
+</div>
 <script>
-let cv=document.getElementById('cv'),X=cv.getContext('2d'),W=420,H=680;
-let br=0,ar=0,ax=210,ay=110,dx=2.8,dy=2,pow=0,st=0,bx=210,by=560,bs=1,gx=210,gtx=210,gkJump=0,confetti=[];
-function drawStadium(){
- // ceu
- let g=X.createLinearGradient(0,0,0,120);g.addColorStop(0,'#87ceeb');g.addColorStop(1,'#e0f6ff');X.fillStyle=g;X.fillRect(0,0,W,130);
- // arquibancada - torcida 3D
- X.fillStyle='#1a4a8a';X.fillRect(0,0,W,40);X.fillStyle='#2a5a9a';X.fillRect(0,40,W,50);
- for(let i=0;i<80;i++){let x=(i*53)%W,y=10+(i%3)*18;X.fillStyle=i%2?'#ffcc00':'#fff';X.fillRect(x,y,8,8);X.fillStyle=i%3==0?'#009739':'#75aadb';X.fillRect(x,y+8,8,5);}
- // bandeiras
- X.fillStyle='#009739';X.fillRect(10,95,70,14);X.fillStyle='#ffcc00';X.font='bold 10px Arial';X.fillText('BRASIL',15,105);
- X.fillStyle='#75aadb';X.fillRect(W-80,95,70,14);X.fillStyle='#fff';X.fillText('ARGENTINA',W-78,105);
- // campo em perspectiva 3D
- X.fillStyle='#3cb44b';X.beginPath();X.moveTo(0,130);X.lineTo(W,130);X.lineTo(W, H);X.lineTo(0,H);X.fill();
- X.fillStyle='#4ec85e';for(let i=130;i<H;i+=35){X.fillRect(0,i,W,18);}
- // linhas do campo perspectiva
- X.strokeStyle='#fff';X.lineWidth=2;X.strokeRect(20,140,W-40,90);
- X.beginPath();X.moveTo(W/2,140);X.lineTo(W/2-80,H);X.moveTo(W/2,140);X.lineTo(W/2+80,H);X.stroke();
- X.lineWidth=1;X.setLineDash([8,8]);X.beginPath();X.moveTo(0,250);X.lineTo(W,250);X.stroke();X.setLineDash([]);
- // sombra do gol
- X.fillStyle='rgba(0,0,0,0.3)';X.fillRect(45,145,W-90,12);
- // GOL 3D com profundidade
- X.fillStyle='#fff';X.fillRect(40,125,W-80,8); // travess
+const cv=document.getElementById('c'),X=cv.getContext('2d'),W=400,H=700;
+let bubbles=[],nextColor,curX=200,curY=620,aimX=200,aimY=200,aiming=false,score=0,time=60;
+let colors=['#ff2a2a','#2aff2a','#2a7aff','#ffeb2a','#ff2aff','#2affff'];
+let cols=10,rows=8,rad=18;
+
+function randCol(){return colors[Math.floor(Math.random()*colors.length)];}
+function init(){
+ bubbles=[];for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){if(r>4&&Math.random()<0.3)continue;let x=20+c*36+(r%2)*18,y=20+r*32;bubbles.push({x,y,c:randCol(),alive:true});}
+ nextColor=randCol();time=60;score=0;
+}
+function draw(){
+ X.clearRect(0,0,W,H);
+ // grid
+ bubbles.forEach(b=>{if(!b.alive)return;
+  X.fillStyle='rgba(0,0,0,0.4)';X.beginPath();X.arc(b.x+3,b.y+4,rad,0,7);X.fill();
+  X.fillStyle=b.c;X.beginPath();X.arc(b.x,b.y,rad,0,7);X.fill();
+  X.fillStyle='rgba(255,255,255,0.6)';X.beginPath();X.arc(b.x-5,b.y-5,5,0,7);X.fill();
+ });
+ // aim line
+ if(aiming){X.strokeStyle='#fff';X.setLineDash([8,6]);X.lineWidth=2;X.beginPath();X.moveTo(curX,curY);X.lineTo(aimX,aimY);X.stroke();X.setLineDash([]);
+  X.strokeStyle='#ffff00';X.lineWidth=2;X.beginPath();X.arc(aimX,aimY,18,0,7);X.stroke();}
+ // current bubble
+ X.fillStyle=nextColor;X.beginPath();X.arc(curX,curY,rad+3,0,7);X.fill();
+ X.fillStyle='rgba(255,255,255,0.8)';X.beginPath();X.arc(curX-4,curY-4,5,0,7);X.fill();
+ X.strokeStyle='#fff';X.lineWidth=2.5;X.stroke();
+}
+function getClosest(x,y){let best=null,dist=999;bubbles.forEach(b=>{if(!b.alive)return;let d=Math.hypot(b.x-x,b.y-y);if(d<dist){dist=d;best=b;}});return best;}
+
+function shoot(){
+ let dx=aimX-curX,dy=aimY-curY,d=Math.hypot(dx,dy);dx/=d;dy/=d;
+ let bx=curX,by=curY,steps=0;
+ let iv=setInterval(()=>{
+  bx+=dx*12;by+=dy*12;steps++;
+  if(bx<rad||bx>W-rad)dx*=-1;
+  if(by<30){clearInterval(iv);place(bx,by);return;}
+  let hit=bubbles.find(b=>b.alive&&Math.hypot(b.x-bx,b.y-by)<rad*1.9);
+  if(hit||steps>80){clearInterval(iv);place(bx,by);}
+ },16);
+}
+function place(x,y){
+ let nb={x,y:Math.max(20,y),c:nextColor,alive:true};bubbles.push(nb);nextColor=randCol();
+ checkPop(nb);
+}
+function checkPop(start){
+ let same=[start],queue=[start],vis=new Set([start]);
+ while(queue.length){let cur=queue.pop();bubbles.forEach(b=>{if(!b.alive||vis.has(b)||b.c!==cur.c)return;if(Math.hypot(b.x-cur.x,b.y-cur.y)<38){vis.add(b);same.push(b);queue.push(b);}});}
+ if(same.length>=3){same.forEach(b=>b.alive=false);score+=same.length*10;document.getElementById('score').innerText=score;}
+}
+cv.addEventListener('touchstart',e=>{let t=e.touches[0],r=cv.getBoundingClientRect();aimX=(t.clientX-r.left)*(W/r.width);aimY=(t.clientY-r.top)*(H/r.height);aiming=true;});
+cv.addEventListener('touchmove',e=>{let t=e.touches[0],r=cv.getBoundingClientRect();aimX=(t.clientX-r.left)*(W/r.width);aimY=(t.clientY-r.top)*(H/r.height);});
+cv.addEventListener('touchend',()=>{if(aiming){aiming=false;shoot();}});
+cv.addEventListener('mousedown',e=>{let r=cv.getBoundingClientRect();aimX=(e.clientX-r.left)*(W/r.width);aimY=(e.clientY-r.top)*(H/r.height);aiming=true;});
+cv.addEventListener('mousemove',e=>{if(!aiming)return;let r=cv.getBoundingClientRect();aimX=(e.clientX-r.left)*(W/r.width);aimY=(e.clientY-r.top)*(H/r.height);});
+cv.addEventListener('mouseup',()=>{if(aiming){aiming=false;shoot();}});
+setInterval(()=>{if(time>0){time--;document.getElementById('time').innerText=time;} },1000);
+init();(function loop(){draw();requestAnimationFrame(loop);})();
+</script></body></html>
