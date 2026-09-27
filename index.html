@@ -1,118 +1,39 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-<meta charset="UTF-8">
+<!DOCTYPE html><html><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>Subway Star Dash</title>
-<style>
-*{margin:0;padding:0}body{background:#222;overflow:hidden;font-family:Arial Black}
-canvas{display:block;margin:0 auto;background:#6d3a22}
-#hud{position:fixed;top:0;left:0;right:0;padding:10px;display:flex;justify-content:space-between;color:#fff;font-size:20px}
-</style>
-</head>
-<body>
-<div id="hud"><span>⭐ <b id="c">0</b></span><span><b id="s">0</b>m</span></div>
-<canvas id="g" width="360" height="640"></canvas>
+<title>Brasil x Argentina - Penalty</title>
+<style>*{margin:0;padding:0}body{background:#0a3d1a;overflow:hidden;font-family:Arial Black;touch-action:none}
+canvas{display:block;margin:0 auto} #hud{position:fixed;top:0;left:0;right:0;padding:8px 10px;display:flex;justify-content:space-between;color:#fff;font-size:16px;background:#0009;z-index:10}</style>
+</head><body>
+<div id="hud"><span>🇧🇷 <b id="br">0</b> x <b id="ar">0</b> 🇦🇷</span><span id="turn">VOCÊ CHUTA</span></div>
+<canvas id="cv" width="360" height="640"></canvas>
 <script>
-const canvas=document.getElementById('g'), ctx=canvas.getContext('2d');
-let W=360,H=640,lane=1,lanes=[60,180,300],coins=0,score=0,speed=5;
-let playerY=H-120, obstacles=[], coinList=[], game=true;
-let keys={}, touchX=0;
-
-function drawTrack(){
-  ctx.fillStyle='#6d3a22'; ctx.fillRect(0,0,W,H);
-  // trilhos
-  for(let l=0;l<3;l++){
-    let x=lanes[l];
-    ctx.fillStyle='#5a2e18'; ctx.fillRect(x-55,0,110,H);
-    ctx.fillStyle='#3d1f0f';
-    for(let y=-20;y<H;y+=40){ ctx.fillRect(x-50,y+score%40,100,12); }
-    ctx.fillStyle='#c0c8d0'; ctx.fillRect(x-30,0,6,H); ctx.fillRect(x+24,0,6,H);
-  }
-  // respingos tinta igual foto
-  ctx.fillStyle='rgba(255,220,0,0.6)'; ctx.beginPath(); ctx.arc(40,200,15,0,7); ctx.fill();
-  ctx.fillStyle='rgba(0,180,255,0.5)'; ctx.beginPath(); ctx.arc(300,350,12,0,7); ctx.fill();
+let C=document.getElementById('cv'),X=C.getContext('2d'),W=360,H=640;
+let br=0,ar=0,myTurn=true,aimX=180,aimY=90,dirX=2.2,dirY=1.4,pow=0,st='aim',ball={x:180,y:530,r:12},gk={x:180,y:100,tx:180},anim=0;
+function draw(){
+X.fillStyle='#3aa655';X.fillRect(0,0,W,H); X.fillStyle='#2d8a44';for(let i=0;i<H;i+=32)X.fillRect(0,i,W,16);
+X.fillStyle='#fff';X.fillRect(25,15,W-50,6);X.fillRect(25,15,6,140);X.fillRect(W-31,15,6,140);
+X.fillStyle='rgba(255,255,255,.25)';X.fillRect(31,21,W-62,128);
+X.strokeStyle='rgba(255,255,255,.15)';for(let i=0;i<7;i++){X.beginPath();X.moveTo(31+i*44,21);X.lineTo(31+i*44,149);X.stroke();}
+// mira poki
+if(st=='aim'||st=='pow'){X.strokeStyle='#ff0';X.lineWidth=3;X.beginPath();X.arc(aimX,aimY,20,0,7);X.stroke();X.fillStyle='#f00';X.beginPath();X.arc(aimX,aimY,5,0,7);X.fill();X.strokeStyle='#fff';X.lineWidth=2;X.beginPath();X.moveTo(aimX-14,aimY);X.lineTo(aimX+14,aimY);X.moveTo(aimX,aimY-14);X.lineTo(aimX,aimY+14);X.stroke();}
+// goleiro Argentina
+let gx=gk.x,gy=gk.y; X.fillStyle=myTurn?'#75aadb':'#ffcc00'; X.fillRect(gx-15,gy,30,32); // azul argentina ou amarelo brasil
+X.fillStyle='#fff';X.fillRect(gx-10,gy+6,20,6); X.fillStyle='#ffb17a';X.beginPath();X.arc(gx,gy-5,11,0,7);X.fill();
+X.fillStyle='#fff';X.fillRect(gx-18,gy+10,9,7);X.fillRect(gx+9,gy+10,9,7);
+X.fillStyle='#000';X.fillRect(gx-10,gy+24,7,16);X.fillRect(gx+3,gy+24,7,16);
+gk.x+=(gk.tx-gk.x)*0.15;
+// bola
+X.fillStyle='#fff';X.beginPath();X.arc(ball.x,ball.y,ball.r,0,7);X.fill();X.fillStyle='#000';X.beginPath();X.arc(ball.x,ball.y,4.5,0,7);X.fill();
+// power
+if(st=='pow'){X.fillStyle='#000';X.fillRect(15,H-70,W-30,16);X.fillStyle=pow>80?'#f00':pow>50?'#ff0':'#0f0';X.fillRect(15,H-70,pow*3.3,16);X.fillStyle='#fff';X.strokeRect(15,H-70,W-30,16);}
+X.fillStyle='#fff';X.font='bold 12px Arial';X.textAlign='center';
+if(st=='aim')X.fillText('1º TOQUE: TRAVA A MIRA',180,H-18);
+if(st=='pow')X.fillText('2º TOQUE: FORÇA (NO VERDE!)',180,H-18);
 }
-function drawPlayer(){
-  let x=lanes[lane];
-  // sombra
-  ctx.fillStyle='rgba(0,0,0,0.3)'; ctx.beginPath(); ctx.ellipse(x,playerY+28,18,8,0,0,7); ctx.fill();
-  // pernas
-  ctx.fillStyle='#2a5ab0'; ctx.fillRect(x-12,playerY+10,10,18); ctx.fillRect(x+2,playerY+10,10,18);
-  // corpo
-  ctx.fillStyle='#e6f0ff'; ctx.fillRect(x-15,playerY-10,30,22);
-  // cabeça
-  ctx.fillStyle='#ffb17a'; ctx.beginPath(); ctx.arc(x,playerY-18,14,0,7); ctx.fill();
-  // boné
-  ctx.fillStyle='#0044ff'; ctx.beginPath(); ctx.arc(x,playerY-20,14,0,3.14,true); ctx.fill();
-  ctx.fillStyle='#ffcc00'; ctx.fillRect(x-14,playerY-20,28,5);
-}
-function drawCoin(x,y){
-  // moeda igual foto
-  ctx.fillStyle='#ffcc00'; ctx.beginPath(); ctx.arc(x,y,18,0,7); ctx.fill();
-  ctx.fillStyle='#ff3300'; ctx.beginPath(); ctx.arc(x,y,13,0,7); ctx.fill();
-  ctx.fillStyle='#ffaa00'; ctx.beginPath(); ctx.arc(x,y,8,0,7); ctx.fill();
-  ctx.fillStyle='yellow'; ctx.font='bold 14px Arial'; ctx.textAlign='center'; ctx.fillText('★',x,y+5);
-}
-function addObs(){
-  let l=Math.floor(Math.random()*3);
-  let type=Math.random()<0.6?'train':'bar';
-  obstacles.push({lane:l,y:-60,type:type,color:type=='train'?['#ffcc00','#ff4444','#555'][Math.floor(Math.random()*3)]:'#d22'});
-}
-function addCoin(){ coinList.push({lane:Math.floor(Math.random()*3),y:-40}); }
-
-function update(){
-  if(!game)return;
-  score+=speed*0.1; speed+=0.002;
-  document.getElementById('s').innerText=Math.floor(score);
-  document.getElementById('c').innerText=coins;
-  drawTrack();
-  if(Math.random()<0.03)addObs();
-  if(Math.random()<0.06)addCoin();
-  // obstaculos
-  for(let o of obstacles){
-    o.y+=speed;
-    let x=lanes[o.lane];
-    if(o.type=='train'){
-      ctx.fillStyle=o.color; ctx.fillRect(x-35,o.y,70,45);
-      ctx.fillStyle='#87ceeb'; ctx.beginPath(); ctx.arc(x,o.y+15,8,0,7); ctx.fill();
-    }else{
-      ctx.fillStyle=o.color; ctx.fillRect(x-35,o.y+20,70,14);
-    }
-    if(Math.abs(o.y-playerY)<30 && o.lane==lane){
-      if(o.type=='bar'){ game=false; alert('BATEU! '+Math.floor(score)+'m | '+coins+' estrelas'); location.reload(); }
-      else if(o.type=='train'){ game=false; alert('BATEU! '+Math.floor(score)+'m | '+coins+' estrelas'); location.reload(); }
-    }
-  }
-  // moedas
-  for(let c of coinList){
-    c.y+=speed; drawCoin(lanes[c.lane],c.y);
-    if(Math.abs(c.y-playerY)<30 && c.lane==lane){ coins++; c.y=1000; }
-  }
-  obstacles=obstacles.filter(o=>o.y<H+60);
-  coinList=coinList.filter(c=>c.y<H+60);
-  drawPlayer();
-  requestAnimationFrame(update);
-}
-// controles
-canvas.addEventListener('touchstart',e=>touchX=e.touches[0].clientX);
-canvas.addEventListener('touchend',e=>{
-  let dx=e.changedTouches[0].clientX-touchX;
-  if(dx>30 && lane<2)lane++;
-  if(dx<-30 && lane>0)lane--;
-});
-window.addEventListener('keydown',e=>{
-  if(e.key=='ArrowLeft'&&lane>0)lane--;
-  if(e.key=='ArrowRight'&&lane<2)lane++;
-});
-update();
-</script>
-</body>
-</html>
-function addO(){let l=Math.floor(Math.random()*3);obs.push({l:l,y:-60,t:Math.random()<0.6?'t':'b',c:Math.random()<0.33?'#ffcc00':Math.random()<0.5?'#ff4444':'#555'});}
-function addC(){cls.push({l:Math.floor(Math.random()*3),y:-40});}
-function loop(){if(!game)return;score+=speed*0.1;speed+=0.002;document.getElementById('s').innerText=Math.floor(score);document.getElementById('c').innerText=coins;track();if(Math.random()<0.03)addO();if(Math.random()<0.06)addC();for(let o of obs){o.y+=speed;let x=lanes[o.l];if(o.t=='t'){cx.fillStyle=o.c;cx.fillRect(x-35,o.y,70,45);cx.fillStyle='#87ceeb';cx.beginPath();cx.arc(x,o.y+15,8,0,7);cx.fill();}else{cx.fillStyle='#d22';cx.fillRect(x-35,o.y+20,70,14);}if(Math.abs(o.y-py)<28&&o.l==lane){alert('BATEU! '+Math.floor(score)+'m | '+coins+' estrelas');location.reload();return;}}for(let c of cls){c.y+=speed;coin(lanes[c.l],c.y);if(Math.abs(c.y-py)<28&&c.l==lane){coins++;c.y=1000;}}obs=obs.filter(o=>o.y<H+60);cls=cls.filter(c=>c.y<H+60);player();requestAnimationFrame(loop);}
-cv.addEventListener('touchstart',e=>tx=e.touches[0].clientX);cv.addEventListener('touchend',e=>{let dx=e.changedTouches[0].clientX-tx;if(dx>30&&lane<2)lane++;if(dx<-30&&lane>0)lane--;});
-addEventListener('keydown',e=>{if(e.key=='ArrowLeft'&&lane>0)lane--;if(e.key=='ArrowRight'&&lane<2)lane++;});
-loop();
-</script></body></html>
+function reset(){ball={x:180,y:530,r:12};st='aim';pow=0;gk={x:180,y:100,tx:180};aimX=180;aimY=90;}
+function cpuShoot(){
+myTurn=false;document.getElementById('turn').innerText='GOLEIRO DEFENDE!';st='cpu';
+let cpuAimX=50+Math.random()*(W-100), cpuAimY=30+Math.random()*100;
+gk.tx=cpuAimX+(Math.random()*60-30); ball.x=180; ball.y=530;
+let iv=setInterval(()=>{ball.x+=(cpuAimX-ball.x)*0.07;ball.y+=(cpuAimY-ball.y)*0.07;ball.r-=0.07;draw();
+if(Math.abs(ball.x-cpuAimX)<3){clearInterval(iv
